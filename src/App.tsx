@@ -11,10 +11,12 @@ import { SavedUnitsDrawer } from './components/SavedUnitsDrawer';
 import { BtoRadarView } from './components/BtoRadarView';
 import { PriceAnalyticsView } from './components/PriceAnalyticsView';
 import { StandaloneCalculatorView } from './components/StandaloneCalculatorView';
-import { Map, List, Building, ArrowUpDown } from 'lucide-react';
+import { LiveTransactionsView } from './components/LiveTransactionsView';
+import { ApiHealthModal } from './components/ApiHealthModal';
+import { Map, List, Building } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'explorer' | 'bto-radar' | 'analytics' | 'calculator'>('explorer');
+  const [activeTab, setActiveTab] = useState<'explorer' | 'bto-radar' | 'analytics' | 'calculator' | 'live-feed'>('explorer');
 
   // Filter state
   const [filter, setFilter] = useState<FilterState>({
@@ -34,6 +36,9 @@ export default function App() {
   const [selectedProperty, setSelectedProperty] = useState<PropertyListing | null>(null);
   const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
 
+  // API Health Modal state
+  const [isApiHealthOpen, setIsApiHealthOpen] = useState(false);
+
   // Saved / Bookmarks (with local storage)
   const [savedPropertyIds, setSavedPropertyIds] = useState<string[]>(() => {
     try {
@@ -48,7 +53,7 @@ export default function App() {
     try {
       localStorage.setItem('ucp_saved_properties', JSON.stringify(savedPropertyIds));
     } catch {
-      // storage quota or sandbox fallback
+      // storage quota fallback
     }
   }, [savedPropertyIds]);
 
@@ -150,7 +155,7 @@ export default function App() {
         return prev.filter((item) => item !== id);
       }
       if (prev.length >= 4) {
-        return prev; // max 4
+        return prev;
       }
       return [...prev, id];
     });
@@ -158,7 +163,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col text-[#0F172A]">
-      {/* Top Bar Contract (One-row, 3-zone contract) */}
+      {/* Top Bar Contract */}
       <TopNav
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -166,6 +171,7 @@ export default function App() {
         onOpenSaved={() => setIsSavedOpen(true)}
         compareCount={comparePropertyIds.length}
         onOpenCompare={() => setIsCompareOpen(true)}
+        onOpenApiHealth={() => setIsApiHealthOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -251,7 +257,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Mobile Floating Toggle Pill Button (16px above bottom) */}
+            {/* Mobile Floating Toggle Pill Button */}
             <div className="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-30">
               <button
                 onClick={() =>
@@ -275,15 +281,26 @@ export default function App() {
           </div>
         )}
 
-        {/* Tab 2: BTO Radar View */}
+        {/* Tab 2: Live Data.gov.sg Keyless Feed */}
+        {activeTab === 'live-feed' && (
+          <LiveTransactionsView onOpenApiHealth={() => setIsApiHealthOpen(true)} />
+        )}
+
+        {/* Tab 3: BTO Radar View */}
         {activeTab === 'bto-radar' && <BtoRadarView />}
 
-        {/* Tab 3: Price Analytics View */}
+        {/* Tab 4: Price Analytics View */}
         {activeTab === 'analytics' && <PriceAnalyticsView />}
 
-        {/* Tab 4: Grants & Affordability Standalone View */}
+        {/* Tab 5: Grants & Affordability Standalone View */}
         {activeTab === 'calculator' && <StandaloneCalculatorView />}
       </main>
+
+      {/* API Health Monitor Modal */}
+      <ApiHealthModal
+        isOpen={isApiHealthOpen}
+        onClose={() => setIsApiHealthOpen(false)}
+      />
 
       {/* Property Detail Modal */}
       {selectedProperty && (
