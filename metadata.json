@@ -1,0 +1,6 @@
+{
+  "name": "Urban Civic Precision - Singapore Housing Intelligence",
+  "description": "Authoritative Singapore public and private housing intelligence portal with split-view map search, BTO & resale analytics, MOP tracking, and mortgage calculations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
